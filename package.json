@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "async": "^3.2.0",
     "dotenv": "^8.2.0",
     "mongoose": "^5.10.0",
+    "rss-parser": "^3.9.0",
     "telegraf": "^3.38.0"
   },
   "devDependencies": {
