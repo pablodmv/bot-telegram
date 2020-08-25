@@ -49,7 +49,24 @@ bot.command("/diaria", (ctx) => {
       ctx.reply(feed.title);
 
       feed.items.forEach((item) => {
-        ctx.reply(item.link);
+        ctx.reply(`${item.title} ${item.link}`);
+      });
+    })();
+  } catch (error) {
+    ctx.reply(error);
+  }
+});
+
+bot.command("/mvd", (ctx) => {
+  try {
+    (async () => {
+      let feed = await parser.parseURL(
+        "https://www.montevideo.com.uy/anxml.aspx?58"
+      );
+      ctx.reply(feed.title);
+
+      feed.items.forEach((item) => {
+        ctx.reply(`${item.title} ${item.link}`);
       });
     })();
   } catch (error) {
@@ -99,7 +116,8 @@ bot.on("text", async (ctx) => {
   } else {
     ctx.reply(`Hola ${ctx.chat.first_name}. Para usar el bot ejecuta los siguientes comandos
   /diaria
-  /observa`);
+  /observa
+  /mvd`);
     ctx.reply(`También puedes buscar un texto en las noticias. Para buscar ejecuta los siguientes comandos
   /buscar_diaria  
   /buscar_observa
@@ -117,8 +135,9 @@ function buscar(search, url, ctx, origen) {
       );
       var flag_no_encontro = 0;
       feed.items.forEach((item) => {
+        console.log(item.title);
         if (item.title.search(new RegExp(search, "i")) > 0) {
-          ctx.reply(item.link);
+          ctx.reply(`${item.title} ${item.link}`);
           flag_no_encontro = 1;
         }
       });
