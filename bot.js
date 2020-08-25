@@ -67,48 +67,69 @@ bot.command("/buscar_observa", (ctx) => {
   ctx.reply("Ingrese el texto a buscar");
 });
 
+bot.command("/buscar", (ctx) => {
+  _globalLastCommand = "/buscar";
+  ctx.reply("Ingrese el texto a buscar en todas las noticias");
+});
+
 bot.on("text", async (ctx) => {
   if (
     _globalLastCommand === "/buscar_diaria" ||
-    _globalLastCommand === "/buscar_observa"
+    _globalLastCommand === "/buscar_observa" ||
+    _globalLastCommand === "/buscar"
   ) {
     let url = "";
-    if (_globalLastCommand === "/buscar_diaria") {
+    let url2 = "";
+    let search = ctx.message.text;
+    if (
+      _globalLastCommand === "/buscar_diaria" ||
+      _globalLastCommand === "/buscar"
+    ) {
       url = "https://ladiaria.com.uy/feeds/articulos/";
+      buscar(search, url, ctx);
     }
-    if (_globalLastCommand === "/buscar_observa") {
-      url = "https://www.elobservador.com.uy/rss/elobservador.xml";
+    if (
+      _globalLastCommand === "/buscar_observa" ||
+      _globalLastCommand === "/buscar"
+    ) {
+      url2 = "https://www.elobservador.com.uy/rss/elobservador.xml";
+      buscar(search, url2, ctx);
     }
-    try {
-      let search = ctx.message.text;
-      ctx.reply(`Buscando ${search}`);
-      (async () => {
-        let feed = await parser.parseURL(url);
-        var flag_no_encontro = 0;
-        feed.items.forEach((item) => {
-          if (item.title.search(new RegExp(search, "i")) > 0) {
-            ctx.reply(item.link);
-            flag_no_encontro = 1;
-          }
-        });
-        if (flag_no_encontro === 0) {
-          ctx.reply(`No encontró resultados con ${search}`);
-        }
-      })();
-      _globalLastCommand = "";
-    } catch (error) {
-      ctx.reply(error);
-    }
+    _globalLastCommand = "";
   } else {
     ctx.reply(`Hola ${ctx.chat.first_name}. Para usar el bot ejecuta los siguientes comandos
   /diaria
   /observa`);
     ctx.reply(`También puedes buscar un texto en las noticias. Para buscar ejecuta los siguientes comandos
   /buscar_diaria  
-  /buscar_observa`);
+  /buscar_observa
+  /buscar`);
   }
   messageDB.postMessage(ctx.from.id, ctx.chat.first_name, ctx.message.text);
 });
+
+function buscar(search, url, ctx, origen) {
+  try {
+    (async () => {
+      let feed = await parser.parseURL(url);
+      ctx.reply(
+        `Buscando ${search} en ${feed.title}. Fecha actualizado: ${feed.lastBuildDate}`
+      );
+      var flag_no_encontro = 0;
+      feed.items.forEach((item) => {
+        if (item.title.search(new RegExp(search, "i")) > 0) {
+          ctx.reply(item.link);
+          flag_no_encontro = 1;
+        }
+      });
+      if (flag_no_encontro === 0) {
+        ctx.reply(`No encontró resultados con ${search} en ${feed.title}`);
+      }
+    })();
+  } catch (error) {
+    ctx.reply(error);
+  }
+}
 
 //rss_parser();
 
