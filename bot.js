@@ -84,6 +84,11 @@ bot.command("/buscar_observa", (ctx) => {
   ctx.reply("Ingrese el texto a buscar");
 });
 
+bot.command("/buscar_mvd", (ctx) => {
+  _globalLastCommand = "/buscar_mvd";
+  ctx.reply("Ingrese el texto a buscar");
+});
+
 bot.command("/buscar", (ctx) => {
   _globalLastCommand = "/buscar";
   ctx.reply("Ingrese el texto a buscar en todas las noticias");
@@ -93,10 +98,12 @@ bot.on("text", async (ctx) => {
   if (
     _globalLastCommand === "/buscar_diaria" ||
     _globalLastCommand === "/buscar_observa" ||
+    _globalLastCommand === "/buscar_mvd" ||
     _globalLastCommand === "/buscar"
   ) {
     let url = "";
     let url2 = "";
+    let url3 = "";
     let search = ctx.message.text;
     if (
       _globalLastCommand === "/buscar_diaria" ||
@@ -112,6 +119,13 @@ bot.on("text", async (ctx) => {
       url2 = "https://www.elobservador.com.uy/rss/elobservador.xml";
       buscar(search, url2, ctx);
     }
+    if (
+      _globalLastCommand === "/buscar_mvd" ||
+      _globalLastCommand === "/buscar"
+    ) {
+      url3 = "https://www.montevideo.com.uy/anxml.aspx?58";
+      buscar(search, url3, ctx);
+    }
     _globalLastCommand = "";
   } else {
     ctx.reply(`Hola ${ctx.chat.first_name}. Para usar el bot ejecuta los siguientes comandos
@@ -121,6 +135,7 @@ bot.on("text", async (ctx) => {
     ctx.reply(`También puedes buscar un texto en las noticias. Para buscar ejecuta los siguientes comandos
   /buscar_diaria  
   /buscar_observa
+  /buscar_mvd
   /buscar`);
   }
   messageDB.postMessage(ctx.from.id, ctx.chat.first_name, ctx.message.text);
@@ -135,8 +150,11 @@ function buscar(search, url, ctx, origen) {
       );
       var flag_no_encontro = 0;
       feed.items.forEach((item) => {
-        console.log(item.title);
-        if (item.title.search(new RegExp(search, "i")) > 0) {
+        if (
+          item.title.search(
+            new RegExp(search, "i") || item.link.search(new RegExp(search, "i"))
+          ) >= 0
+        ) {
           ctx.reply(`${item.title} ${item.link}`);
           flag_no_encontro = 1;
         }
